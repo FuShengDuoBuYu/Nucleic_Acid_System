@@ -42,6 +42,8 @@ class mixedDetectedPerson{
         //修改检测后的状态
         void changePersonStatus(string status,int detectionCubeCode){
             if(status=="negative"){
+                cout << mixedVector[2].getDetectionCubeCode() << endl;
+                cout << mixedVector[3].getDetectionCubeCode() << endl;
                 //管子对应的10个人的状态转为阴
                 for (int i = 0; i < mixedVector.size();i++){
                     if(mixedVector[i].getDetectionCubeCode()==detectionCubeCode){
@@ -59,7 +61,11 @@ class mixedDetectedPerson{
                 //
             }
             if(status=="suspicious"){
-
+                for (int i = 0; i < mixedVector.size();i++){
+                    if(mixedVector[i].getDetectionCubeCode()==detectionCubeCode){
+                        mixedVector[i].changeDetectStatus("suspicious");
+                    }
+                }
             }
         }
 };
@@ -100,10 +106,14 @@ class singleDetectedPerson{
         //修改检测后的状态
         void changePersonStatus(string status,int detectionCubeCode,mixedDetectedPerson &mixedDetectedPerson){
             if(status=="negative"){
-                //管子对应的人的状态转为阴
+                //管子对应的人的状态不是密接才是阴
                 for (int i = 0; i < singleVector.size();i++){
                     if(singleVector[i].getDetectionCubeCode()==detectionCubeCode){
-                        singleVector[i].changeDetectStatus("negative");
+                        if(singleVector[i].getDetectStatus()!="closeContacts")
+                            singleVector[i].changeDetectStatus("negative");
+                        else{
+                            cout << "this person is closeContact!" << endl;
+                        }
                     }
                 }
             }
@@ -116,11 +126,13 @@ class singleDetectedPerson{
                         positiveIndex = i;
                     }
                 }
-                //同栋楼标为密接,也即前三位相同为密接
+                //同栋楼标为密接,也即前三位相同为密接,阳性本人不是密接
                 string buildingNum = singleVector[positiveIndex].getPersonCode().substr(0,3);
                 for (int i = 0; i < singleVector.size();i++){
                     if(singleVector[i].getPersonCode().substr(0,3)==buildingNum){
-                        singleVector[i].changeDetectStatus("closeContacts");
+                        if(i!=positiveIndex){
+                            singleVector[i].changeDetectStatus("closeContacts");
+                        }
                     }
                 }
                 //混检也是一样
@@ -129,15 +141,17 @@ class singleDetectedPerson{
                         mixedDetectedPerson.mixedVector[i].changeDetectStatus("closeContacts");
                     }
                 }
-                //排队在他前面的十人为密接
+                //排队在他前面的十人不为阳性时才为密接
                 if(positiveIndex>=10){
                     for (int i = 0; i < 10;i++){
-                        singleVector[positiveIndex - i].changeDetectStatus("closeContacts");
+                        if(singleVector[positiveIndex - i].getDetectStatus()!="positive")
+                            singleVector[positiveIndex - i].changeDetectStatus("closeContacts");
                     }
                 }
                 else{
                     for (int i = 0; i < positiveIndex;i++){
-                        singleVector[i].changeDetectStatus("closeContacts");
+                        if(singleVector[i].getDetectStatus()!="positive")
+                            singleVector[i].changeDetectStatus("closeContacts");
                     }
                 }
                 //排队后面的人全是密接
@@ -178,6 +192,8 @@ class singleDetectedPerson{
                         }
                     }
                 }
+                //确保阳的人是阳而不是其他状态
+                singleVector[positiveIndex].changeDetectStatus("positive");
             }
             if(status=="suspicious"){
                 //管子对应的人的状态转为可疑

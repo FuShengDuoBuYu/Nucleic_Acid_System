@@ -317,7 +317,6 @@ void readDataFromFile(string waitingFile,string DetectedFile){
     getline(detected, s);
     // 获取混采和单采已检测的人数
     split(s, twoDetectedSize, ' ');
-    cout << '1' << endl;
     //加入到已检测中去
     for (int i = 0; i < twoDetectedSize[0];i++){
         if((i+1)%10==0){
@@ -325,8 +324,9 @@ void readDataFromFile(string waitingFile,string DetectedFile){
             vector<detectPersonInfo> persons = mpdq.detectPerson();
             //已检测加十
             for (int i = 0; i < persons.size();i++){
-                mdp.addPerson(persons[i].getPersonCode(), mixedDetectionCubeCode++);
+                mdp.addPerson(persons[i].getPersonCode(), mixedDetectionCubeCode);
             }
+            mixedDetectionCubeCode++;
         }
     }
     for (int i = 0; i < twoDetectedSize[1];i++){
